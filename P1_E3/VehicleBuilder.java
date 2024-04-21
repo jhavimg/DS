@@ -1,4 +1,4 @@
-package EJ3;
+package P1_E3;
 
 public abstract class VehicleBuilder {
     protected Vehicle vehicle;
