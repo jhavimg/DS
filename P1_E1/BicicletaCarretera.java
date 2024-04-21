@@ -1,4 +1,4 @@
-package EJ1;
+package P1_E1;
 
 public class BicicletaCarretera extends Bicicleta{
     @Override

@@ -1,7 +1,7 @@
-package EJ3;
+package P1_E3;
 
-public class TruckBuilder extends VehicleBuilder {
-    public TruckBuilder() {
+public class MotorcycleBuilder extends VehicleBuilder {
+    public MotorcycleBuilder() {
         createNewVehicle();
     }
 
@@ -10,7 +10,7 @@ public class TruckBuilder extends VehicleBuilder {
     }
 
     public void buildWheels() {
-        vehicle.wheels = 6;
+        vehicle.wheels = 2;
     }
 
     public void buildColor(boolean color, String color_vehicle) {
