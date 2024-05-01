@@ -1,15 +1,17 @@
 // ignore_for_file: file_names, non_constant_identifier_names
 
 import 'Strategy.dart';
+import 'package:flutter/material.dart';
 
 class Vehicle{
 //Atributos de la clase
+  late String tipo = "";
   late Strategy strategy;
   late double baseCost;
   late String engine;
   late int wheels;
   late bool color = false;
-  late String color_vehicle;
+  late String color_vehicle = "blanco por defecto";
   late bool audioSystem = false;
   late bool transmission = false;
 
@@ -40,7 +42,7 @@ class Vehicle{
     String audioSystemString = audioSystem ? "Personalizado" : "No personalizado";
     String transmissionString = transmission ? "Personalizado" : "No personalizado";
 
-    String formato = "\nMotor: $engine \nRuedas: $wheels";
+    String formato = "Tipo de vehiculo: $tipo \nMotor: $engine \nRuedas: $wheels";
     formato += "\nColor: $colorString \nColor del vehiculo: $color_vehicle";
     formato += "\nSistema de audio: $audioSystemString \nTransmision: $transmissionString";
     return  formato;

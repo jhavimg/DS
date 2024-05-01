@@ -8,6 +8,7 @@ abstract class VehicleBuilder{
 
   VehicleBuilder({required this.baseCost});
 
+
   Vehicle getVehicle(){
     return vehicle;
   }

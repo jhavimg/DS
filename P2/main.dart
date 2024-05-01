@@ -5,6 +5,7 @@ import 'VehicleDirector.dart';
 import 'CarBuilder.dart';
 import 'MotorcycleBuilder.dart';
 import 'TruckBuilder.dart';
+import 'GestorVehiculos.dart';
 
 void main() {
   runApp(const MyApp());
@@ -38,10 +39,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _gasolina = false , _diesel = false, _pintar = false , _transmision = false , _radio = false;
-  String _type = '';
+  String _type = 'predeterminado';
   Color _color = Colors.white;
   List<Color> colores = [Colors.red, Colors.blue, Colors.green];
   late VehicleBuilder b;
+  GestorVehiculos gestor = GestorVehiculos();
 
   void _iniciarAtributos(){
     _gasolina = false ; _diesel = false;
@@ -105,6 +107,15 @@ class _MyHomePageState extends State<MyHomePage> {
                       onTap: () {
                         setState(() {
                           _color = color;
+                          vehicle.color = true;
+                          if(_color == Colors.green){
+                            vehicle.color_vehicle = "Verde";
+                          }else if(_color == Colors.blue){
+                            vehicle.color_vehicle = "Azul";
+                          }else if(_color == Colors.red){
+                            vehicle.color_vehicle = "Rojo";
+                          }
+
                         });
                         Navigator.of(context).pop();
                         _showAttributesDialog(context, vehicle);
@@ -136,6 +147,17 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           actions: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  vehicle.tipo = _type;
+                  gestor.agregarVehiculo(vehicle);
+                  _iniciarAtributos();
+                });
+                Navigator.of(context).pop();
+              },
+              child: Text('Aceptar'),
+            ),
             ElevatedButton(
               onPressed: () {
                 _iniciarAtributos();
@@ -172,12 +194,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: ElevatedButton(
                     onPressed: () {
                       setState(() {
-                        _type = 'coche';
+                        _type = 'Coche';
                         b = new CarBuilder(baseCost: 5000);
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _type == 'coche' ? Colors.purple[200] : Colors.white,
+                      backgroundColor: _type == 'Coche' ? Colors.purple[200] : Colors.white,
                     ),
                     child: Text('Coche'),
                   ),
@@ -187,12 +209,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: ElevatedButton(
                     onPressed: () {
                       setState(() {
-                        _type = 'moto';
+                        _type = 'Moto';
                         b = new MotorcycleBuilder(baseCost: 2500);
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _type == 'moto' ? Colors.purple[200] : Colors.white,
+                      backgroundColor: _type == 'Moto' ? Colors.purple[200] : Colors.white,
                     ),
                     child: Text('Moto'),
                   ),
@@ -202,13 +224,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: ElevatedButton(
                     onPressed: () {
                       setState(() {
-                        _type = 'camion';
+                        _type = 'Camion';
                         b = new TruckBuilder(baseCost: 10000);
                       });
                     },
                     child: Text('Camión'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _type == 'camion' ? Colors.purple[200] : Colors.white,
+                      backgroundColor: _type == 'Camion' ? Colors.purple[200] : Colors.white,
                     ),
                   ),
                 ),
@@ -317,7 +339,52 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(10),
+              itemCount: gestor.vehiculos.length,
+
+              itemBuilder: (context, index) {
+                final vehicle = gestor.vehiculos[index];
+                return Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5), // Color de la sombra
+                        spreadRadius: 5, // Extensión de la sombra
+                        blurRadius: 7, // Desenfoque de la sombra
+                        offset: Offset(0, 3), // Desplazamiento horizontal y vertical de la sombra
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(10),
+                  margin: EdgeInsets.only(top: 20, left: 20, right: 20),
+                  child: Row(
+                      children: <Widget>[
+
+                        Expanded(
+                          child: Text(vehicle.toString()),
+                        ),
+
+                        //Boton para eliminar vehiculo
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            setState(() {
+                              gestor.eliminarVehiculo(vehicle);
+                            });
+                          },
+                        ),
+                      ]
+                  ),
+                );
+              },
+            ),
+          ),
         ],
+
 
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
