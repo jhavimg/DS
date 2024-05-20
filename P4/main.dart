@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:practica2/ColorAzul.dart';
-import 'package:practica2/ColorVerde.dart';
 import 'package:practica2/ColorRojo.dart';
+import 'package:practica2/ColorVerde.dart';
+
+import 'CarBuilder.dart';
+import 'GestorVehiculos.dart';
+import 'MotorcycleBuilder.dart';
+import 'Strategy.dart';
+import 'TruckBuilder.dart';
 import 'Vehicle.dart';
 import 'VehicleBuilder.dart';
 import 'VehicleDirector.dart';
-import 'CarBuilder.dart';
-import 'MotorcycleBuilder.dart';
-import 'TruckBuilder.dart';
-import 'GestorVehiculos.dart';
-import 'Strategy.dart';
 
 void main() {
   runApp(const MyApp());
@@ -47,7 +48,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Color _color = Colors.white;
   List<Color> colores = [Colors.red, Colors.blue, Colors.green];
   late VehicleBuilder b;
-  GestorVehiculos gestor = GestorVehiculos();
+  GestorVehiculos gestor = GestorVehiculos([]);
+  String usuarioActual = 'Adri';
+  List<String> usuarios = [ 'Adri','Ane',  'Ángel', 'Godoy', 'Jesus'];
 
   void _iniciarAtributos(){
     _gasolina = false ; _diesel = false;
@@ -57,6 +60,54 @@ class _MyHomePageState extends State<MyHomePage> {
     _type = '';
     _color = Colors.white;
   }
+
+
+ @override
+  void initState() {
+    super.initState();
+    _cargarVehiculosIniciales();
+  }
+
+  void _cargarVehiculosIniciales() async {
+    try {
+      await gestor.cargarVehiculos(usuarioActual);
+      setState(() {});
+    } catch (e) {
+      print("Error loading tasks: $e");
+    }
+  }
+
+
+  void _addVehicle(Vehicle v) async {
+    if (v.tipo != null) {
+      try {
+        await gestor.agregarVehiculo(Vehicle(tipo: v.tipo, baseCost: v.baseCost, engine: v.engine, wheels: v.wheels, color: v.color, 
+                                    color_vehicle: v.color_vehicle, audioSystem: v.audioSystem, transmission: v.transmission, id: null, usuario: usuarioActual));
+      } catch (e) {
+        print("Error adding task: $e");
+      }
+      setState(() {});
+    }
+  }
+
+  void _updateVehicle(Vehicle vehiculo) async {
+    try {
+      await gestor.actualizarVehiculo(vehiculo);
+    } catch (e) {
+      print("Error marking task completed: $e");
+    }
+    setState(() {});
+  }
+
+  void _deleteVehicle(Vehicle vehiculo) async {
+    try {
+      await gestor.eliminarVehiculo(vehiculo);
+    } catch (e) {
+      print("Error deleting task: $e");
+    }
+    setState(() {});
+  }
+
 
   void _showAlert_Motor() {
     showDialog(
@@ -88,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: ListBody(
               children: <Widget>[
                 Text('Tipo de vehículo: $_type'),
-                Text("Tipo de motor: " + vehicle.engine),
+                Text("Tipo de motor: ${vehicle.engine}"),
                 SwitchListTile(
                   title: const Text('¿Pintar el vehículo?',
                     style: TextStyle(
@@ -145,9 +196,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     );
                   }).toList(),
                 ),
-                if(vehicle.transmission)
+                if(vehicle.transmission == true)
                   Text("Transmisión personalizada"),
-                if(vehicle.audioSystem)
+                if(vehicle.audioSystem == true)
                   Text("Sistema de audio personalizado"),
                 Text("Coste de tu vehiculo: " + vehicle.calculateCost(b.baseCost).toString()),
               ],
@@ -158,7 +209,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 setState(() {
                   vehicle.tipo = _type;
-                  gestor.agregarVehiculo(vehicle);
+                  _addVehicle(vehicle);
                   _iniciarAtributos();
                 });
                 Navigator.of(context).pop();
@@ -184,6 +235,31 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+        actions: <Widget>[
+        Container(
+          width: 100, // Establece el ancho deseado
+          child: DropdownButton<String>(
+            value: usuarioActual,
+            icon: Icon(Icons.arrow_downward),
+            isExpanded: true, // Permite que el contenido ocupe todo el ancho del contenedor
+            onChanged: (String? newValue) {
+              if (newValue != null && newValue != usuarioActual) {
+                setState(() {
+                  usuarioActual = newValue;
+                  _cargarVehiculosIniciales();
+                });
+              }
+              _cargarVehiculosIniciales();
+            },
+            items: usuarios.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -363,6 +439,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         d.constructVehicle();
                         Vehicle v = b.getVehicle();
                         _showAttributesDialog(context, v);
+
                       } else {
                         _showAlert_Motor();
                       }
@@ -377,7 +454,6 @@ class _MyHomePageState extends State<MyHomePage> {
             child: ListView.builder(
               padding: const EdgeInsets.all(10),
               itemCount: gestor.vehiculos.length,
-
               itemBuilder: (context, index) {
                 final vehicle = gestor.vehiculos[index];
                 return Container(
@@ -395,9 +471,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   padding: const EdgeInsets.all(10),
                   margin: EdgeInsets.only(top: 20, left: 20, right: 20),
+
                   child: Row(
                       children: <Widget>[
-
                         Expanded(
                           child: Text(vehicle.toString()),
                         ),
@@ -407,7 +483,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           icon: Icon(Icons.delete, color: Colors.red),
                           onPressed: () {
                             setState(() {
-                              gestor.eliminarVehiculo(vehicle);
+                              _deleteVehicle(vehicle);
                             });
                           },
                         ),

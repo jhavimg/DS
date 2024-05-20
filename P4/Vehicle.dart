@@ -1,19 +1,65 @@
 // ignore_for_file: file_names, non_constant_identifier_names
 
 import 'Strategy.dart';
-import 'package:flutter/material.dart';
 
 class Vehicle{
 //Atributos de la clase
-  late String tipo = "";
+  String? tipo;
   late Strategy strategy;
-  late double baseCost;
-  late String engine;
-  late int wheels;
-  late bool color = false;
-  late String color_vehicle = "blanco por defecto";
-  late bool audioSystem = false;
-  late bool transmission = false;
+  double? baseCost;
+  String? engine;
+  int? wheels;
+  bool? color = false;
+  String color_vehicle;
+  bool? audioSystem = false;
+  bool? transmission = false;
+
+  int? id;
+  String? usuario;
+
+  //Constructor de la clase
+  Vehicle({
+    this.tipo, 
+    this.baseCost, 
+    this.engine, 
+    this.wheels, 
+    this.color, 
+    this.color_vehicle = "Blanco por defecto", 
+    this.audioSystem, 
+    this.transmission, 
+    this.id, 
+    this.usuario});
+
+  factory Vehicle.fromJson(Map<String, dynamic> json){
+    return Vehicle(
+      tipo: json['tipo'] as String?,
+      baseCost: json['baseCost'] as double?,
+      engine: json['engine'] as String?,
+      wheels: json['wheels'] as int?,
+      color: json['color'] as bool?,
+      color_vehicle: json['color_vehicle'] as String,
+      audioSystem: json['audioSystem'] as bool?,
+      transmission: json['transmission'] as bool?,
+      id: json['id'] as int?,
+      usuario: json['usuario'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'tipo': tipo,
+      'baseCost': baseCost,
+      'engine': engine,
+      'wheels': wheels,
+      'color': color,
+      'color_vehicle': color_vehicle,
+      'audioSystem': audioSystem,
+      'transmission': transmission,
+
+      if (id != null) 'id': id,
+      'usuario': usuario,
+    };
+  }
 
 //Funciones de la clase
   void setStrategy(Strategy strategy){
@@ -25,22 +71,23 @@ class Vehicle{
 
     double additionalCost = 0;
 
-    additionalCost += color ? 500 : 0;
-    additionalCost += audioSystem ? 1000 : 0;
-    additionalCost += transmission ? 1500 : 0;
+    additionalCost += (color == true) ? 500 : 0;
+    additionalCost += (audioSystem == true) ? 1000 : 0;
+    additionalCost += (transmission == true) ? 1500 : 0;
 
     return baseCost + additionalCost;
   }
 
   void buildColor(){
     color_vehicle = strategy.buildColor();
+
   }
 
   @override
   String toString(){
-    String colorString = color ? "Personalizado" : "No personalizado";
-    String audioSystemString = audioSystem ? "Personalizado" : "No personalizado";
-    String transmissionString = transmission ? "Personalizado" : "No personalizado";
+    String colorString = (color == true) ? "Personalizado" : "No personalizado";
+    String audioSystemString = (audioSystem == true) ? "Personalizado" : "No personalizado";
+    String transmissionString = (transmission == true) ? "Personalizado" : "No personalizado";
 
     String formato = "Tipo de vehiculo: $tipo \nMotor: $engine \nRuedas: $wheels";
     formato += "\nColor: $colorString \nColor del vehiculo: $color_vehicle";

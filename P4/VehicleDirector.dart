@@ -11,9 +11,9 @@ class VehicleDirector {
   }
 
   void constructVehicle(){
-    builder.buildEngine(builder.vehicle.engine);
+    builder.buildEngine(builder.vehicle.engine!);
     builder.buildWheels();
-    builder.buildAudioSystem(builder.vehicle.audioSystem);
-    builder.buildTransmission(builder.vehicle.transmission);
+    builder.buildAudioSystem(builder.vehicle.audioSystem ?? false);
+    builder.buildTransmission(builder.vehicle.transmission ?? false);
   }
 }
