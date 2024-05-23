@@ -50,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late VehicleBuilder b;
   GestorVehiculos gestor = GestorVehiculos([]);
   String usuarioActual = 'Adri';
-  List<String> usuarios = [ 'Adri','Ane',  'Ángel', 'Godoy', 'Jesus'];
+  List<String> usuarios = [ 'Adri','Ane',  'Ángel', 'Godoy', 'Jesus', 'testUser'];
 
   void _iniciarAtributos(){
     _gasolina = false ; _diesel = false;
@@ -90,9 +90,10 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _updateVehicle(Vehicle vehiculo) async {
+  void _updateVehicle(Vehicle v) async {
     try {
-      await gestor.actualizarVehiculo(vehiculo);
+      await gestor.actualizarVehiculo(Vehicle(tipo: v.tipo, baseCost: v.baseCost, engine: v.engine, wheels: v.wheels, color: v.color, 
+                                    color_vehicle: v.color_vehicle, audioSystem: v.audioSystem, transmission: v.transmission, id: v.id, usuario: usuarioActual));
     } catch (e) {
       print("Error marking task completed: $e");
     }
@@ -211,6 +212,106 @@ class _MyHomePageState extends State<MyHomePage> {
                   vehicle.tipo = _type;
                   _addVehicle(vehicle);
                   _iniciarAtributos();
+                });
+                Navigator.of(context).pop();
+              },
+              child: Text('Aceptar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _iniciarAtributos();
+                Navigator.of(context).pop();
+              },
+              child: Text('Cerrar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+void _showAttributesDialogUpdate(BuildContext context, Vehicle vehicle) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Atributos del vehículo'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Tipo de vehículo: ${vehicle.tipo}'),
+                Text("Tipo de motor: ${vehicle.engine}"),
+                SwitchListTile(
+                  title: const Text('¿Pintar el vehículo?',
+                    style: TextStyle(
+                      fontSize: 12.0,
+                    ),
+                  ),
+                  value: _pintar,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _pintar = value;
+                    });
+                    Navigator.of(context).pop();
+                    _showAttributesDialogUpdate(context, vehicle);
+                  },
+                ),
+                if (_pintar) Wrap(
+                  children: colores.map((color) {
+                    bool isSelected = color == _color;
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _color = color;
+                          vehicle.color = true;
+                          late Strategy estrategia;
+                          if(_color == Colors.green){
+                            estrategia = new ColorVerde();
+                          }else if(_color == Colors.blue){
+                            estrategia = new ColorAzul();
+                          }else if(_color == Colors.red){
+                            estrategia = new ColorRojo();
+                          }
+                          vehicle.setStrategy(estrategia);
+                          vehicle.buildColor();
+
+                        });
+                        Navigator.of(context).pop();
+                        _showAttributesDialogUpdate(context, vehicle);
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.all(4.0),
+                        padding: const EdgeInsets.all(4.0),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isSelected ? Colors.black : Colors.transparent,
+                            width: 2.0,
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          backgroundColor: color,
+                          radius: 15.0,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                if(vehicle.transmission == true)
+                  Text("Transmisión personalizada"),
+                if(vehicle.audioSystem == true)
+                  Text("Sistema de audio personalizado"),
+                // Text("Coste de tu vehiculo: " + vehicle.calculateCost(b.baseCost).toString()),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  // vehicle.tipo = _type;
+                  _updateVehicle(vehicle);
+                  // _iniciarAtributos();
                 });
                 Navigator.of(context).pop();
               },
@@ -478,6 +579,17 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: Text(vehicle.toString()),
                         ),
 
+                        IconButton(
+                          icon: Icon(Icons.edit, color: Colors.black),
+                          onPressed: () {
+                            setState(() {
+                              // VehicleDirector d = new VehicleDirector(b);
+                              // d.constructVehicle();
+                              // Vehicle v = b.getVehicle();
+                              _showAttributesDialogUpdate(context, vehicle);
+                            });
+                          },
+                        ),
                         //Boton para eliminar vehiculo
                         IconButton(
                           icon: Icon(Icons.delete, color: Colors.red),
